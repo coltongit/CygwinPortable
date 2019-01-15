@@ -40,11 +40,22 @@ namespace CygwinPortableCS
                         string path = "";
                         string exitAfterExecute = "0";
                         int idx = 0;
+
                         foreach (string arg in args)
                         {
                             if (args[idx] == "-path")
                             {
                                 path = args[idx + 1];
+                            }
+
+                            if (args[idx] == "-wsl")
+                            {
+                                Globals.CurrentEnvironment = "wsl";
+                            }
+
+                            if (args[idx] == "-cygwin")
+                            {
+                                Globals.CurrentEnvironment = "cygwin";
                             }
 
                             if (args[idx] == "-exit")
@@ -60,12 +71,13 @@ namespace CygwinPortableCS
                         
                         if (exitAfterExecute == "1")
                         {
-                            Globals.Config["Main"]["ExitAfterExec"].StringValue = "true";
+                            Globals.MainConfig["Cygwin"]["ExitAfterExec"] = true;
                         }
-                        
+
 
                         //MessageBox.Show("Test" + path, "Test", MessageBoxButtons.YesNo);
                         Cygwin.CygwinOpen(path);
+
                         Environment.Exit(-1);
                     }
 
@@ -73,7 +85,7 @@ namespace CygwinPortableCS
             }
             catch (IndexOutOfRangeException)
             {
-                Console.WriteLine("Possible Commandline options: " + args[0] + " [-path <PATH>] [-exit <0/1>]");
+                Console.WriteLine("Possible Commandline options: " + args[0] + " [-cygwin] [-wsl] [-path <PATH>] [-exit <0/1>]");
                 Console.WriteLine("-path 'C:\\Windows' open Windows folder");
                 Console.WriteLine("-exit 0 let the cygwin window open, -exit 1 close the cygwin window after execution");
                 Console.WriteLine("");
@@ -83,6 +95,10 @@ namespace CygwinPortableCS
                 Console.WriteLine("   " + args[0] + " -path 'C:\\shellscript.sh' -exit 0");
                 Console.WriteLine("Sample to open C:\\Windows Folder WITHOUT arguemnts:");
                 Console.WriteLine("   " + args[0] + " 'C:\\Windows'");
+                Console.WriteLine("Sample to open C:\\Windows Folder with cygwin:");
+                Console.WriteLine("   " + args[0] + " -cygwin -path 'C:\\Windows'");
+                Console.WriteLine("Sample to open C:\\Windows Folder with wsl:");
+                Console.WriteLine("   " + args[0] + " -wsl -path 'C:\\Windows'");
             }
 
             ChangeRegistryPath.Change();
@@ -116,7 +132,7 @@ namespace CygwinPortableCS
         private void CybeSystemsRunXServer_Click(object sender, EventArgs e)
         {
             string path = Globals.AppPath + "\\Runtime\\Cygwin\\bin\\run.exe";
-            string parameter = "/bin/bash.exe -c '/bin/startxwin -- -nolock -unixkill";
+            string parameter = "/bin/bash.exe --login -i -c '/bin/startxwin -- -nolock -unixkill'";
             string pathname = Globals.AppPath;
             int flag = 1;
             ShellExecute(0, "open", path, parameter, pathname, flag);
@@ -126,7 +142,7 @@ namespace CygwinPortableCS
         private void CybeSystemsRunCygwinSetup(object sender, EventArgs e)
         {
             string path = Globals.AppPath + "\\Runtime\\Cygwin\\CygwinConfig.exe";
-            string parameter = "-R " + Globals.AppPath + "\\Runtime\\cygwin\\ -l " + Globals.AppPath + "\\Runtime\\cygwin\\packages -n -d -N -s " + Globals.Config["Main"]["CygwinMirror"].StringValue;
+            string parameter = "-R " + Globals.AppPath + "\\Runtime\\cygwin\\ -l " + Globals.AppPath + "\\Runtime\\cygwin\\packages -n -d -N -s " + (string)Globals.MainConfig["Cygwin"]["CygwinMirror"];
             string pathname = Globals.AppPath;
             int flag = 1;
             ShellExecute(0, "open", path, parameter, pathname, flag);
@@ -135,7 +151,7 @@ namespace CygwinPortableCS
         private void CybeSystemsRunCygwinSetupWithPorts(object sender, EventArgs e)
         {
             string path = Globals.AppPath + "\\Runtime\\Cygwin\\CygwinConfig.exe";
-            string parameter = " -K http://cygwinports.org/ports.gpg -R " + Globals.AppPath + "\\Runtime\\cygwin\\ -l " + Globals.AppPath + "\\Runtime\\cygwin\\packages -n -d -N -s " + Globals.Config["Main"]["CygwinPortsMirror"].StringValue;
+            string parameter = " -K http://cygwinports.org/ports.gpg -R " + Globals.AppPath + "\\Runtime\\cygwin\\ -l " + Globals.AppPath + "\\Runtime\\cygwin\\packages -n -d -N -s " + (string)Globals.MainConfig["Cygwin"]["CygwinPortsMirror"];
             string pathname = Globals.AppPath;
             int flag = 1;
             ShellExecute(0, "open", path, parameter, pathname, flag);

@@ -46,13 +46,18 @@ namespace CygwinPortableCS
                 }
                 else
                 {
-                    if (Globals.Config["Main"]["SetContextMenu"].BoolValue)
+                    if ((bool)Globals.MainConfig["Cygwin"]["SetContextMenu"])
                     {
-                        SetRegistry();
+                        SetRegistryCygwin();
+                        if ((bool)Globals.MainConfig["Cygwin"]["SupportWSL"])
+                        {
+                            SetRegistryWSL();
+                        }
                     }
                     else
                     {
-                        UnSetRegistry();
+                        UnSetRegistryCygwin();
+                        UnSetRegistryWSL();
                     }
                 }
             }
@@ -64,7 +69,7 @@ namespace CygwinPortableCS
             RegistryKey key = Registry.ClassesRoot.OpenSubKey("*\\shell\\Run in Cygwin");
 
             //Key exists but path is wrong
-            if (key != null && Globals.Config["Main"]["SetContextMenu"].BoolValue)
+            if (key != null && (bool)Globals.MainConfig["Cygwin"]["SetContextMenu"])
             {
                 return true;
             }
@@ -76,7 +81,7 @@ namespace CygwinPortableCS
             RegistryKey key = Registry.ClassesRoot.OpenSubKey("*\\shell\\Run in Cygwin");
 
             //Key exists but path is wrong
-            if (key != null && Globals.Config["Main"]["SetContextMenu"].BoolValue)
+            if (key != null && (bool)Globals.MainConfig["Cygwin"]["SetContextMenu"])
             {
 
                 if (key.GetValue("Icon").ToString() != Globals.AppPath + "\\AppInfo\\appicon.ico")
@@ -86,51 +91,109 @@ namespace CygwinPortableCS
             }
 
             //Key dont exists and SetContextMenu is enabled
-            if (key == null && Globals.Config["Main"]["SetContextMenu"].BoolValue)
+            if (key == null && (bool)Globals.MainConfig["Cygwin"]["SetContextMenu"])
             {
                     return false;
             }
 
             //Key exists but SetContextMenu is disabled
-            if (key != null && !Globals.Config["Main"]["SetContextMenu"].BoolValue)
+            if (key != null && !(bool)Globals.MainConfig["Cygwin"]["SetContextMenu"])
             {
                 return false;
             }
             return true;
         }
 
-        public static void SetRegistry()
+        public static void SetRegistryCygwin()
         {
             //Icon Files
-            RegistryKey iconFileKey = Registry.ClassesRoot.CreateSubKey("*\\shell\\Run in Cygwin");
+            RegistryKey iconFileKey = Registry.ClassesRoot.CreateSubKey("*\\shell\\RunInCygwin");
+            iconFileKey.SetValue("", "Run in Cygwin");
             iconFileKey.SetValue("Icon", Globals.AppPath + "\\AppInfo\\appicon.ico", RegistryValueKind.ExpandString);
             iconFileKey.Close();
 
-            RegistryKey commandFileKey = Registry.ClassesRoot.CreateSubKey("*\\shell\\Run in Cygwin\\command");
-            commandFileKey.SetValue("", "\"" + Globals.ExeFile + "\" -path \"%1\"");
+            RegistryKey commandFileKey = Registry.ClassesRoot.CreateSubKey("*\\shell\\RunInCygwin\\command");
+            commandFileKey.SetValue("", "\"" + Globals.ExeFile + "\" -cygwin -path \"%1\"");
             commandFileKey.Close();
 
             //Icon Directory
-            RegistryKey iconDirectoryKey = Registry.ClassesRoot.CreateSubKey("Directory\\shell\\OpenDirectoryInCygwin");
+            RegistryKey iconDirectoryKey = Registry.ClassesRoot.CreateSubKey("Directory\\shell\\OpenFolderInCygwin");
+            iconDirectoryKey.SetValue("", "Open Folder in Cygwin");
             iconDirectoryKey.SetValue("Icon", Globals.AppPath + "\\AppInfo\\appicon.ico", RegistryValueKind.ExpandString);
             iconDirectoryKey.Close();
 
-            RegistryKey commandDirectoryKey = Registry.ClassesRoot.CreateSubKey("Directory\\shell\\OpenDirectoryInCygwin\\command");
-            commandDirectoryKey.SetValue("", "\"" + Globals.ExeFile + "\" -path \"%L\"");
+            RegistryKey commandDirectoryKey = Registry.ClassesRoot.CreateSubKey("Directory\\shell\\OpenFolderInCygwin\\command");
+            commandDirectoryKey.SetValue("", "\"" + Globals.ExeFile + "\" -cygwin -path \"%L\"");
             commandDirectoryKey.Close();
+
+            //Icon Blank Directory
+            RegistryKey iconBlankDirectoryKey = Registry.ClassesRoot.CreateSubKey("Directory\\Background\\shell\\OpenFolderInCygwin");
+            iconBlankDirectoryKey.SetValue("", "Open Folder in Cygwin");
+            iconBlankDirectoryKey.SetValue("Icon", Globals.AppPath + "\\AppInfo\\appicon.ico", RegistryValueKind.ExpandString);
+            iconBlankDirectoryKey.Close();
+
+            RegistryKey commandBlankDirectoryKey = Registry.ClassesRoot.CreateSubKey("Directory\\Background\\shell\\OpenFolderInCygwin\\command");
+            commandBlankDirectoryKey.SetValue("", "\"" + Globals.ExeFile + "\" -cygwin -path \"%V\"");
+            commandBlankDirectoryKey.Close();
 
             //Icon Drive
             RegistryKey iconDriveKey = Registry.ClassesRoot.CreateSubKey("Drive\\shell\\OpenDriveInCygwin");
+            iconDriveKey.SetValue("", "Open Drive in Cygwin");
             iconDriveKey.SetValue("Icon", Globals.AppPath + "\\AppInfo\\appicon.ico", RegistryValueKind.ExpandString);
             iconDriveKey.Close();
 
             RegistryKey commandDriveKey = Registry.ClassesRoot.CreateSubKey("Drive\\shell\\OpenDriveInCygwin\\command");
-            commandDriveKey.SetValue("", "\"" + Globals.ExeFile + "\" -path \"%1\"");
+            commandDriveKey.SetValue("", "\"" + Globals.ExeFile + "\" -cygwin -path \"%1\"");
             commandDriveKey.Close();
 
         }
 
-        public static void UnSetRegistry()
+        public static void SetRegistryWSL()
+        {
+            //Icon Files
+            RegistryKey iconFileKey = Registry.ClassesRoot.CreateSubKey("*\\shell\\RunInBash");
+            iconFileKey.SetValue("", "Run in Bash");
+            iconFileKey.SetValue("Icon", Globals.AppPath + "\\AppInfo\\ubuntu.ico", RegistryValueKind.ExpandString);
+            iconFileKey.Close();
+
+            RegistryKey commandFileKey = Registry.ClassesRoot.CreateSubKey("*\\shell\\RunInBash\\command");
+            commandFileKey.SetValue("", "\"" + Globals.ExeFile + "\" -wsl -path \"%1\"");
+            commandFileKey.Close();
+
+            //Icon Directory
+            RegistryKey iconDirectoryKey = Registry.ClassesRoot.CreateSubKey("Directory\\shell\\OpenFolderInBash");
+            iconDirectoryKey.SetValue("", "Open Folder in Bash");
+            iconDirectoryKey.SetValue("Icon", Globals.AppPath + "\\AppInfo\\ubuntu.ico", RegistryValueKind.ExpandString);
+            iconDirectoryKey.Close();
+
+            RegistryKey commandDirectoryKey = Registry.ClassesRoot.CreateSubKey("Directory\\shell\\OpenFolderInBash\\command");
+            commandDirectoryKey.SetValue("", "\"" + Globals.ExeFile + "\" -wsl -path \"%L\"");
+            commandDirectoryKey.Close();
+
+            //Icon Blank Directory
+            RegistryKey iconBlankDirectoryKey = Registry.ClassesRoot.CreateSubKey("Directory\\Background\\shell\\OpenFolderInBash");
+            iconBlankDirectoryKey.SetValue("", "Open Folder in Bash");
+            iconBlankDirectoryKey.SetValue("Icon", Globals.AppPath + "\\AppInfo\\ubuntu.ico", RegistryValueKind.ExpandString);
+            iconBlankDirectoryKey.Close();
+
+            RegistryKey commandBlankDirectoryKey = Registry.ClassesRoot.CreateSubKey("Directory\\Background\\shell\\OpenFolderInBash\\command");
+            commandBlankDirectoryKey.SetValue("", "\"" + Globals.ExeFile + "\" -wsl -path \"%V\"");
+            commandBlankDirectoryKey.Close();
+
+            //Icon Drive
+            RegistryKey iconDriveKey = Registry.ClassesRoot.CreateSubKey("Drive\\shell\\OpenDriveInBash");
+            iconDriveKey.SetValue("", "Open Drive in Bash");
+            iconDriveKey.SetValue("Icon", Globals.AppPath + "\\AppInfo\\ubuntu.ico", RegistryValueKind.ExpandString);
+            iconDriveKey.Close();
+
+            RegistryKey commandDriveKey = Registry.ClassesRoot.CreateSubKey("Drive\\shell\\OpenDriveInBash\\command");
+            commandDriveKey.SetValue("", "\"" + Globals.ExeFile + "\" -wsl -path \"%1\"");
+            commandDriveKey.Close();
+
+        }
+
+
+        public static void UnSetRegistryCygwin()
         {
             Registry.ClassesRoot.DeleteSubKey("*\\shell\\Run in Cygwin\\command");
             Registry.ClassesRoot.DeleteSubKey("*\\shell\\Run in Cygwin");
@@ -138,8 +201,26 @@ namespace CygwinPortableCS
             Registry.ClassesRoot.DeleteSubKey("Directory\\shell\\OpenDirectoryInCygwin\\command");
             Registry.ClassesRoot.DeleteSubKey("Directory\\shell\\OpenDirectoryInCygwin");
 
+            Registry.ClassesRoot.DeleteSubKey("Directory\\Background\\shell\\OpenDirectoryInCygwin\\command");
+            Registry.ClassesRoot.DeleteSubKey("Directory\\Background\\shell\\OpenDirectoryInCygwin");
+
             Registry.ClassesRoot.DeleteSubKey("Drive\\shell\\OpenDriveInCygwin\\command");
             Registry.ClassesRoot.DeleteSubKey("Drive\\shell\\OpenDriveInCygwin");
+        }
+
+        public static void UnSetRegistryWSL()
+        {
+            Registry.ClassesRoot.DeleteSubKey("*\\shell\\Run in Bash\\command");
+            Registry.ClassesRoot.DeleteSubKey("*\\shell\\Run in Bash");
+
+            Registry.ClassesRoot.DeleteSubKey("Directory\\shell\\OpenDirectoryInBash\\command");
+            Registry.ClassesRoot.DeleteSubKey("Directory\\shell\\OpenDirectoryInBash");
+
+            Registry.ClassesRoot.DeleteSubKey("Directory\\Background\\shell\\OpenDirectoryInBash\\command");
+            Registry.ClassesRoot.DeleteSubKey("Directory\\Background\\shell\\OpenDirectoryInBash");
+
+            Registry.ClassesRoot.DeleteSubKey("Drive\\shell\\OpenDriveInBash\\command");
+            Registry.ClassesRoot.DeleteSubKey("Drive\\shell\\OpenDriveInBash");
         }
 
     }

@@ -1,0 +1,8 @@
+vim
+X11
+xinit
+wget
+tar
+gawk
+bzip2
+dos2unix

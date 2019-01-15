@@ -1,13 +1,19 @@
 CygwinPortable
 ==============
 
-A portable Cygwin environment with much options. It's very useful for "static" installations too. It can create ShellExtensions in Windows Explorer ("Open Folder in Cygwin", "Open Drive in Cygwin", "Run in Cygwin").  "Open with -> CygwinPortable.exe" is also supported (you can register e.g. .sh extensions with CygwinPortable.exe). XServer is supported. 
+[![Build status](https://ci.appveyor.com/api/projects/status/eo2iu7wv3mx7tn4u/branch/master?svg=true
+)](https://ci.appveyor.com/project/MachinaCore/cygwinportable/branch/master)
 
-ShellExtensions needs admin rights (Only one time to register the ShellExtension - After successfully registration you can run CygwinPortable with UAC enabled). CygwinPrtable run without ShellExtensions but they are pretty comfortable :-)
+[Download current working branches as .paf.exe and .7z from appveyor](https://ci.appveyor.com/project/MachinaCore/cygwinportable/build/artifacts)
+
+
+A portable Cygwin environment with many options. It's very useful for "static" installations too. It can create ShellExtensions in Windows Explorer ("Open Folder in Cygwin", "Open Drive in Cygwin", "Run in Cygwin").  "Open with -> CygwinPortable.exe" is also supported (you can register e.g. .sh extensions with CygwinPortable.exe). XServer is supported. 
+
+ShellExtensions needs admin rights (Only one time to register the ShellExtension - After successful registration you can run CygwinPortable with UAC enabled). CygwinPortable will run without ShellExtensions, but they are pretty comfortable :-)
 
 Download ready to use files
 -----
-You can download prebuild (Cygwin x86) version on http://www.cybesystems.com -> Downloads. I've compiled a PAF (PortableApps) and a 7z compressed version. Cygwin defaults are already installed.
+You can download prebuild (Cygwin x86) version on from [AppVeyer](https://ci.appveyor.com/project/MachinaCore/cygwinportable/build/artifacts). I've compiled a PAF (PortableApps) and a 7z compressed version. Cygwin defaults are already installed.
 
 First Start
 -----
@@ -21,8 +27,24 @@ Commandline Parameters:
 These options overrides the options from Data/config.ini
  - CygwinPortable.exe -path [PATH] -> Open the folder in path or execute the file (if the file is executable)  
  - CygwinPortable.exe -exit [0/1]	-> Exit the cygwin window after execution
+ - CygwinPortable.exe -cygwin	-> Optional: Force run command or open folder in Cygwin
+ - CygwinPortable.exe -wsl	-> Optional: Force run command or open folder on Windows Subsystem for Linux from Microsoft
  - CygwinPortable.exe [PATH] 		-> Open the folder in path or execute the file (if the file is executable) All other parameters are ignored (needed for "open with" in Windows)
 
+ 
+Recommend /etc/fstab
+-----
+You should change /etc/fstab from 
+
+none /cygdrive cygdrive binary,posix=0,user 0 0
+
+to:
+
+none /cygdrive cygdrive binary,noacl,posix=0,user 0 0
+
+The noacl flag ignores filesystem ACLs permissions - For portable (in most cases for static installations too) this is the best setting - With this option you dont write "garbage" permissions to e.g. local rsync backups.
+
+ 
 PortableApps
 -----
 PortableApps (http://portableapps.com/) Tool is supported. Copy the Cygwin Portable folder to USBSTICK:\PortableApps
@@ -42,7 +64,9 @@ There are some interesting options - Rightclick on the CygwinPortable Trayicon -
 **Settings:**
 
  - Shell: You can choose between mintty (default) and ConEmu. I've already included the last stable version of ConEmu (you can replace it with beta if you want - You should only preserve my ConEmu.xml file).
+ - Default Environment: Choose between Cygwin and Windows Subsystem for Linux as default handler for running commands and open folders (you can still override this with "-cygwin" for cygwin and "-wsl" for Windows Subsystem for Linux. Useful if you associate e.g. .sh files with CygwinPortable.exe.
  - Executable File Extensions: Define what extensions are should by executed with Cygwin. This will NOT register the files directly ! This option will tell Cygwin Portable if a "open with" under windows is a extension that can be used from bash. If you open a file with a unknown extesion CygwinPortable will open the folder and not run the file.
+ - Support WSL: Enable Windows Subsystem for Linux for running commands, open folders and Context Manu
  - Use TrayMenu: Enable/Disable the Traymenu (NOT RECOMMEND !) - if the Traymenu is disabled you can reactivate this option in Data/config.ini -> TrayMenu=True
  - Exit after execution: If you open a file in Cygwin (e.g. a Shellscript) the window is closed after successfully execution. If you want see the output leave it disabled.
  - Disable Message Boxes: If CygwinPortable failed it will show the error in a Message Box. Disable it if you are working in a non GUI environment.
@@ -65,7 +89,7 @@ There are some interesting options - Rightclick on the CygwinPortable Trayicon -
 Compile
 -----
 
-You can compile CygwinPortable with any version of Visual Studio (I use 2015) or mono (see build_momo.sh -> This needs a Cygwin Installation)
+You can compile CygwinPortable with any version of Visual Studio (I use 2015) or mono (see build_mono.sh -> This needs a Cygwin Installation)
 
 Feedback
 -----
